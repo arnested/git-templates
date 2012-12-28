@@ -1,0 +1,57 @@
+=head1 My Git templates
+
+This is my Git templates.
+
+I currently just have a post-checkout hook that is run after each
+clone. The rest of it is just the "standard" template.
+
+Put it somewhere (i.e. in C<~/.gitconfig.d/git-templates>) and setup
+your git to use it:
+
+    git config --global --replace-all init.templatedir ~/.gitconfig.d/git-templates
+
+
+=head1 Dependencies
+
+I had to install JSON.pm:
+
+    sudo cpan -i JSON
+
+The rest of the dependencies was already installed.
+
+=head1 The actual hooks
+
+=head2 post-checkout
+
+Doesn't do anything if it is a not run as a clone operation.
+
+Gets the remote URL and does stuff based on where we are cloning from.
+
+=head3 Drupal.org repositories.
+
+Configure C<user.name> and C<user.email>.
+
+They will be set to the value of C<user.drupal.name> and
+C<user.drupal.email> if they exist.
+
+    git config --global --replace-all user.drupal.name arnested
+    git config --global --replace-all user.drupal.email arnested@245635.no-reply.drupal.org
+
+=head3 GitHub repositories.
+
+Use the GitHub API to look up if this repository is a fork of
+another repository and if so set the original repository as
+"upstream" branch.
+
+Configure C<user.name> and C<user.email> based on the GitHub organization.
+
+They will be set to the value of C<user.$org.name> and
+C<user.$org.email> if they exist.
+
+Also set the description of the checkout (C<.git/description>) to the
+description of the GitHub repository.
+
+Getting data through the GitHub API is currently only supported for
+public repos.
+
+    git config --global --replace-all user.reload.email arne@reload.dk

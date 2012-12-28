@@ -1,0 +1,91 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use LWP::UserAgent;
+use JSON qw(from_json);
+
+##
+# Don't do anything if this is a not a clone operation.
+##
+if ($ARGV[0] != "0000000000000000000000000000000000000000") {
+    exit;
+}
+
+##
+# Get the URL the remote.
+##
+my $remote_url = `git ls-remote --get-url`;
+
+##
+# Drupal.org repositories.
+#
+# Configure user.name and user.email.
+#
+# They will be set to the value of user.drupal.name and
+# user.drupal.email if they exist.
+##
+if ($remote_url =~ m|[/@]git.drupal.org[:/]|) {
+  my $org = "drupal";
+  chomp(my $name = `git config --get user.$org.name`);
+  chomp(my $email = `git config --get user.$org.email`);
+  if ($name) {
+    system("git", "config", "--local", "--replace-all", "user.name", $name);
+  }
+  if ($email) {
+    system("git", "config", "--local", "--replace-all", "user.email", $email);
+  }
+}
+
+##
+# GitHub repositories.
+#
+# Use the GitHub API to look up if this repository is a fork of
+# another repository and if so set the original repository as
+# "upstream" branch.
+#
+# Configure user.name and user.email based on the GitHub organization.
+#
+# They will be set to the value of user.$org.name and
+# user.$org.email if they exist.
+#
+# Also set the description of the checkout (.git/description) to the
+# description of the GitHub repository.
+#
+# Getting data through the GitHub API is currently only supported for
+# public repos.
+##
+if ($remote_url =~ m|[/@]github.com[:/]([^/]+)/(.+)|) {
+  my $org = $1;
+  my $repos = $2;
+
+  my $url = "https://api.github.com/repos/$org/$repos";
+  my $ua = LWP::UserAgent->new(ssl_opts => { verify_hostname => 0 });
+  my $decoded = from_json($ua->get($url)->content());
+  my $clone_url = $decoded->{parent}->{clone_url};
+  if (defined $clone_url) {
+    system("git", "remote", "add", "upstream", $clone_url);
+    system("git", "fetch", "upstream");
+  }
+
+  chomp(my $name = `git config --get user.$org.name`);
+  chomp(my $email = `git config --get user.$org.email`);
+  if ($name) {
+    system("git", "config", "--local", "--replace-all", "user.name", $name);
+  }
+  if ($email) {
+    system("git", "config", "--local", "--replace-all", "user.email", $email);
+  }
+
+  my $description = $decoded->{description};
+  if (defined $description) {
+    open(DESCRIPTION, ">.git/description");
+    print DESCRIPTION $description . "\n";
+    close(DESCRIPTION);
+  }
+}
+
+# Local Variables:
+# mode: cperl
+# End:
