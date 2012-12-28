@@ -13,9 +13,10 @@ your git to use it:
 
 =head1 Dependencies
 
-I had to install JSON.pm:
+I had to install JSON.pm and Config::IniFiles.pm:
 
     sudo cpan -i JSON
+    sudo cpan -i Config::IniFiles
 
 The rest of the dependencies was already installed.
 
@@ -33,6 +34,9 @@ Configure C<user.name> and C<user.email>.
 
 They will be set to the value of C<user.drupal.name> and
 C<user.drupal.email> if they exist.
+
+Also set the description of the checkout (.git/description) to the
+description found in the .info file.
 
     git config --global --replace-all user.drupal.name arnested
     git config --global --replace-all user.drupal.email arnested@245635.no-reply.drupal.org

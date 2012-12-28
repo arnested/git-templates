@@ -5,6 +5,7 @@ use warnings;
 
 use LWP::UserAgent;
 use JSON qw(from_json);
+use Config::IniFiles;
 
 ##
 # Don't do anything if this is a not a clone operation.
@@ -25,6 +26,9 @@ my $remote_url = `git ls-remote --get-url`;
 #
 # They will be set to the value of user.drupal.name and
 # user.drupal.email if they exist.
+#
+# Also set the description of the checkout (.git/description) to the
+# description found in the .info file.
 ##
 if ($remote_url =~ m|[/@]git.drupal.org[:/]|) {
   my $org = "drupal";
@@ -35,6 +39,16 @@ if ($remote_url =~ m|[/@]git.drupal.org[:/]|) {
   }
   if ($email) {
     system("git", "config", "--local", "--replace-all", "user.email", $email);
+  }
+  my @info_files = <*.info>;
+  if (defined $info_files[0]) {
+    my $cfg = Config::IniFiles->new( -file => $info_files[0], -fallback => "General", -nocase => 1 );
+    my $description = $cfg->val("General", "Description");
+    if (defined $description) {
+      open(DESCRIPTION, ">.git/description");
+      print DESCRIPTION $description . "\n";
+      close(DESCRIPTION);
+    }
   }
 }
 
