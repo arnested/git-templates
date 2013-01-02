@@ -10,7 +10,7 @@ use Config::IniFiles;
 ##
 # Don't do anything if this is a not a clone operation.
 ##
-if ($ARGV[0] != "0000000000000000000000000000000000000000") {
+if ($ARGV[0] ne "0000000000000000000000000000000000000000") {
     exit;
 }
 
