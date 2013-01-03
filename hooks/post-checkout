@@ -6,6 +6,7 @@ use warnings;
 use LWP::UserAgent;
 use JSON qw(from_json);
 use Config::IniFiles;
+use File::Path qw(make_path);
 
 ##
 # Don't do anything if this is a not a clone operation.
@@ -13,6 +14,14 @@ use Config::IniFiles;
 if ($ARGV[0] ne "0000000000000000000000000000000000000000") {
     exit;
 }
+
+##
+# If git is checking out a specific revision (at least when drush make
+# does it) the .git/logs/refs folder is not created and then you won't
+# be able to run git stash. So let us just make sure the folder is
+# always there.
+##
+make_path('.git/logs/refs');
 
 ##
 # Get the URL the remote.
