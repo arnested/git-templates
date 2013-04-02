@@ -76,6 +76,8 @@ if ($remote_url =~ m|[/@]git.drupal.org[:/]|) {
 # Also set the description of the checkout (.git/description) to the
 # description of the GitHub repository.
 #
+# Add remote origins for fetching pull requests.
+#
 # Getting data through the GitHub API is currently only supported for
 # public repos.
 ##
@@ -107,6 +109,8 @@ if ($remote_url =~ m|[/@]github.com[:/]([^/]+)/(.+)|) {
     print DESCRIPTION $description . "\n";
     close(DESCRIPTION);
   }
+
+  system("git", "config", "--local", "--add", "remote.origin.fetch", "+refs/pull/*/head:refs/remotes/origin/pr/*");
 }
 
 # Local Variables:

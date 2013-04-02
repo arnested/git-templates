@@ -64,3 +64,6 @@ Getting data through the GitHub API is currently only supported for
 public repos.
 
     git config --global --replace-all user.reload.email arne@reload.dk
+
+Add remote origins for fetching pull requests, see
+https://gist.github.com/piscisaureus/3342247.
